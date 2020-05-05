@@ -1,12 +1,10 @@
 <?php
 
-namespace FondOfSpryker\Glue\BrandCompanyUsersRestApi\Processor\Expander;
+namespace FondOfSpryker\Glue\BrandCustomersRestApi\Processor\Expander;
 
 use Codeception\Test\Unit;
 use FondOfSpryker\Glue\BrandCustomersRestApi\Dependency\Client\BrandCustomersRestApiToBrandCustomerClientInterface;
-use FondOfSpryker\Glue\BrandCustomersRestApi\Processor\Expander\CustomerExpander;
 use Generated\Shared\Transfer\CustomerTransfer;
-use Spryker\Glue\Kernel\Container;
 
 class CustomerExpanderTest extends Unit
 {
@@ -16,14 +14,9 @@ class CustomerExpanderTest extends Unit
     protected $customerExpander;
 
     /**
-     * @var \PHPUnit\Framework\MockObject\MockObject|\Spryker\Glue\Kernel\Container
+     * @var \PHPUnit\Framework\MockObject\MockObject|\FondOfSpryker\Glue\BrandCustomersRestApi\Dependency\Client\BrandCustomersRestApiToBrandCustomerClientInterface
      */
-    protected $containerMock;
-
-    /**
-     * @var \PHPUnit\Framework\MockObject\MockObject|\FondOfSpryker\Client\BrandCustomer\BrandCustomerClientInterface
-     */
-    protected $brandCustomerClientInterfaceMock;
+    protected $brandCustomersRestApiToBrandCustomerClientInterfaceMock;
 
     /**
      * @var \PHPUnit\Framework\MockObject\MockObject|\Generated\Shared\Transfer\CustomerTransfer
@@ -37,11 +30,7 @@ class CustomerExpanderTest extends Unit
     {
         parent::_before();
 
-        $this->containerMock = $this->getMockBuilder(Container::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->brandCustomerClientInterfaceMock = $this->getMockBuilder(BrandCustomersRestApiToBrandCustomerClientInterface::class)
+        $this->brandCustomersRestApiToBrandCustomerClientInterfaceMock = $this->getMockBuilder(BrandCustomersRestApiToBrandCustomerClientInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -49,9 +38,7 @@ class CustomerExpanderTest extends Unit
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->customerExpander = new CustomerExpander(
-            $this->brandCustomerClientInterfaceMock
-        );
+        $this->customerExpander = new CustomerExpander($this->brandCustomersRestApiToBrandCustomerClientInterfaceMock);
     }
 
     /**
@@ -59,13 +46,6 @@ class CustomerExpanderTest extends Unit
      */
     public function testExpand(): void
     {
-        $this->brandCustomerClientInterfaceMock->expects($this->atLeastOnce())
-            ->method('expandCustomer')
-            ->willReturn($this->customerTransferMock);
-
-        $this->assertInstanceOf(
-            CustomerTransfer::class,
-            $this->customerExpander->expand($this->customerTransferMock)
-        );
+        $this->assertInstanceOf(CustomerTransfer::class, $this->customerExpander->expand($this->customerTransferMock));
     }
 }

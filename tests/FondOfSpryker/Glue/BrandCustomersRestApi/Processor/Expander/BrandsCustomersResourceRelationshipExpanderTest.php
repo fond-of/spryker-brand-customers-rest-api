@@ -1,17 +1,15 @@
 <?php
 
-namespace FondOfSpryker\Glue\BrandCompanyUsersRestApi\Processor\Expander;
+namespace FondOfSpryker\Glue\BrandCustomersRestApi\Processor\Expander;
 
 use ArrayObject;
 use Codeception\Test\Unit;
-use FondOfSpryker\Glue\BrandCustomersRestApi\Processor\Expander\BrandsCustomersResourceRelationshipExpander;
 use Generated\Shared\Transfer\BrandCollectionTransfer;
 use Generated\Shared\Transfer\BrandTransfer;
 use Generated\Shared\Transfer\CustomerTransfer;
 use Spryker\Glue\GlueApplication\Rest\JsonApi\RestResourceBuilderInterface;
 use Spryker\Glue\GlueApplication\Rest\JsonApi\RestResourceInterface;
 use Spryker\Glue\GlueApplication\Rest\Request\Data\RestRequestInterface;
-use Spryker\Glue\Kernel\Container;
 
 class BrandsCustomersResourceRelationshipExpanderTest extends Unit
 {
@@ -19,6 +17,31 @@ class BrandsCustomersResourceRelationshipExpanderTest extends Unit
      * @var \FondOfSpryker\Glue\BrandCustomersRestApi\Processor\Expander\BrandsCustomersResourceRelationshipExpander
      */
     protected $brandsCustomersResourceRelationshipExpander;
+
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject|\Spryker\Glue\GlueApplication\Rest\JsonApi\RestResourceBuilderInterface
+     */
+    protected $restResourceBuilderInterfaceMock;
+
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject|\Spryker\Glue\GlueApplication\Rest\Request\Data\RestRequestInterface
+     */
+    protected $restRequestInterfaceMock;
+
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject|\Generated\Shared\Transfer\CustomerTransfer
+     */
+    protected $customerTransferMock;
+
+    /**
+     * @var array
+     */
+    protected $resources;
+
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject|\Spryker\Glue\GlueApplication\Rest\JsonApi\RestResourceInterface
+     */
+    protected $restResourceInterfaceMock;
 
     /**
      * @var \PHPUnit\Framework\MockObject\MockObject|\Generated\Shared\Transfer\BrandCollectionTransfer
@@ -31,29 +54,14 @@ class BrandsCustomersResourceRelationshipExpanderTest extends Unit
     protected $brandTransferMock;
 
     /**
-     * @var \PHPUnit\Framework\MockObject\MockObject|\Spryker\Glue\Kernel\Container
+     * @var \ArrayObject
      */
-    protected $containerMock;
+    protected $brandTransferMocks;
 
     /**
-     * @var \PHPUnit\Framework\MockObject\MockObject|\Generated\Shared\Transfer\CustomerTransfer
+     * @var string
      */
-    protected $customerTransferMock;
-
-    /**
-     * @var \PHPUnit\Framework\MockObject\MockObject|\Spryker\Glue\GlueApplication\Rest\JsonApi\RestResourceBuilderInterface
-     */
-    protected $restResourceBuilderInterfaceMock;
-
-    /**
-     * @var \PHPUnit\Framework\MockObject\MockObject|\Spryker\Glue\GlueApplication\Rest\JsonApi\RestResourceInterface
-     */
-    protected $restResourceInterfaceMock;
-
-    /**
-     * @var \PHPUnit\Framework\MockObject\MockObject|\Spryker\Glue\GlueApplication\Rest\Request\Data\RestRequestInterface
-     */
-    protected $restRequestInterfaceMock;
+    protected $uuid;
 
     /**
      * @return void
@@ -62,7 +70,7 @@ class BrandsCustomersResourceRelationshipExpanderTest extends Unit
     {
         parent::_before();
 
-        $this->containerMock = $this->getMockBuilder(Container::class)
+        $this->restResourceBuilderInterfaceMock = $this->getMockBuilder(RestResourceBuilderInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -70,11 +78,15 @@ class BrandsCustomersResourceRelationshipExpanderTest extends Unit
             ->disableOriginalConstructor()
             ->getMock();
 
+        $this->resources = [
+            $this->restResourceInterfaceMock,
+        ];
+
         $this->restRequestInterfaceMock = $this->getMockBuilder(RestRequestInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->restResourceBuilderInterfaceMock = $this->getMockBuilder(RestResourceBuilderInterface::class)
+        $this->customerTransferMock = $this->getMockBuilder(CustomerTransfer::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -86,9 +98,11 @@ class BrandsCustomersResourceRelationshipExpanderTest extends Unit
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->customerTransferMock = $this->getMockBuilder(CustomerTransfer::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->brandTransferMocks = new ArrayObject([
+            $this->brandTransferMock,
+        ]);
+
+        $this->uuid = "uuid";
 
         $this->brandsCustomersResourceRelationshipExpander = new BrandsCustomersResourceRelationshipExpander(
             $this->restResourceBuilderInterfaceMock
@@ -100,23 +114,9 @@ class BrandsCustomersResourceRelationshipExpanderTest extends Unit
      */
     public function testAddResourceRelationships(): void
     {
-        $resources = [
-            $this->restResourceInterfaceMock,
-        ];
-        $this->brandTransferMock->setName('brand');
-        $brands = new ArrayObject();
-        $brands->append($this->brandTransferMock);
-
-        $this->brandTransferMock->expects($this->atLeastOnce())
-            ->method('getUuid')
-            ->willReturn('uuid-12345');
-
-        $this->brandTransferMock->expects($this->atLeastOnce())
-            ->method('toArray')
-            ->willReturn([
-                "uuid" => "uuid-12345",
-                "name" => "brand",
-            ]);
+        $this->restResourceInterfaceMock->expects($this->atLeastOnce())
+            ->method('getPayload')
+            ->willReturn($this->customerTransferMock);
 
         $this->customerTransferMock->expects($this->atLeastOnce())
             ->method('getBrandCollection')
@@ -124,14 +124,67 @@ class BrandsCustomersResourceRelationshipExpanderTest extends Unit
 
         $this->brandCollectionTransferMock->expects($this->atLeastOnce())
             ->method('getBrands')
-            ->willReturn($brands);
+            ->willReturn($this->brandTransferMocks);
 
+        $this->brandTransferMock->expects($this->atLeastOnce())
+            ->method('toArray')
+            ->willReturn([]);
+
+        $this->brandTransferMock->expects($this->atLeastOnce())
+            ->method('getUuid')
+            ->willReturn($this->uuid);
+
+        $this->restResourceBuilderInterfaceMock->expects($this->atLeastOnce())
+            ->method('createRestResource')
+            ->willReturn($this->restResourceInterfaceMock);
+
+        $this->brandsCustomersResourceRelationshipExpander->addResourceRelationships(
+            $this->resources,
+            $this->restRequestInterfaceMock
+        );
+    }
+
+    /**
+     * @return void
+     */
+    public function testAddResourceRelationshipsBrandsNull(): void
+    {
+        $this->restResourceInterfaceMock->expects($this->atLeastOnce())
+            ->method('getPayload')
+            ->willReturn($this->customerTransferMock);
+
+        $this->customerTransferMock->expects($this->atLeastOnce())
+            ->method('getBrandCollection')
+            ->willReturn($this->brandCollectionTransferMock);
+
+        $this->brandsCustomersResourceRelationshipExpander->addResourceRelationships(
+            $this->resources,
+            $this->restRequestInterfaceMock
+        );
+    }
+
+    /**
+     * @return void
+     */
+    public function testAddResourceRelationshipsBrandCollectionNull(): void
+    {
         $this->restResourceInterfaceMock->expects($this->atLeastOnce())
             ->method('getPayload')
             ->willReturn($this->customerTransferMock);
 
         $this->brandsCustomersResourceRelationshipExpander->addResourceRelationships(
-            $resources,
+            $this->resources,
+            $this->restRequestInterfaceMock
+        );
+    }
+
+    /**
+     * @return void
+     */
+    public function testAddResourceRelationshipsCustomerNull(): void
+    {
+        $this->brandsCustomersResourceRelationshipExpander->addResourceRelationships(
+            $this->resources,
             $this->restRequestInterfaceMock
         );
     }
