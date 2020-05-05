@@ -6,7 +6,7 @@ use Codeception\Test\Unit;
 use FondOfSpryker\Glue\BrandCustomersRestApi\BrandCustomersRestApiDependencyProvider;
 use FondOfSpryker\Glue\BrandCustomersRestApi\BrandCustomersRestApiFactory;
 use FondOfSpryker\Glue\BrandCustomersRestApi\Dependency\Client\BrandCustomersRestApiToBrandCustomerClientInterface;
-use FondOfSpryker\Glue\BrandCustomersRestApi\Processor\Expander\CustomerExpanderInterface;
+use FondOfSpryker\Glue\BrandCustomersRestApi\Processor\Expander\CustomerExpander;
 use Spryker\Glue\Kernel\Container;
 
 class BrandCustomersRestApiApiFactoryTest extends Unit
@@ -48,17 +48,6 @@ class BrandCustomersRestApiApiFactoryTest extends Unit
     /**
      * @return void
      */
-   /* public function testCreateBrandsCustomerResourceRelationshipExpander(): void
-    {
-        $this->assertInstanceOf(
-            BrandsCustomersResourceRelationshipExpanderInterface::class,
-            $this->brandCustomersRestApiFactory->createBrandsCustomersResourceRelationshipExpander()
-        );
-    }*/
-
-    /**
-     * @return void
-     */
     public function testCreateCustomerExpander(): void
     {
         $this->containerMock->expects($this->atLeastOnce())
@@ -71,28 +60,8 @@ class BrandCustomersRestApiApiFactoryTest extends Unit
             ->willReturn($this->brandCustomerClientInterfaceMock);
 
         $this->assertInstanceOf(
-            CustomerExpanderInterface::class,
+            CustomerExpander::class,
             $this->brandCustomersRestApiFactory->createCustomerExpander()
-        );
-    }
-
-    /**
-     * @return void
-     */
-    public function testGetBrandCustomerClient(): void
-    {
-        $this->containerMock->expects($this->atLeastOnce())
-            ->method('has')
-            ->willReturn(true);
-
-        $this->containerMock->expects($this->atLeastOnce())
-            ->method('get')
-            ->with(BrandCustomersRestApiDependencyProvider::CLIENT_BRAND_CUSTOMER)
-            ->willReturn($this->brandCustomerClientInterfaceMock);
-
-        $this->assertInstanceOf(
-            BrandCustomersRestApiToBrandCustomerClientInterface::class,
-            $this->brandCustomersRestApiFactory->getBrandCustomerClient()
         );
     }
 }
