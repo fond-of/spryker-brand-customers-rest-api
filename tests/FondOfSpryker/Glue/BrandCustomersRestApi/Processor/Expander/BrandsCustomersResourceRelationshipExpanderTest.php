@@ -102,7 +102,7 @@ class BrandsCustomersResourceRelationshipExpanderTest extends Unit
             $this->brandTransferMock,
         ]);
 
-        $this->uuid = "uuid";
+        $this->uuid = 'uuid';
 
         $this->brandsCustomersResourceRelationshipExpander = new BrandsCustomersResourceRelationshipExpander(
             $this->restResourceBuilderInterfaceMock
@@ -147,7 +147,7 @@ class BrandsCustomersResourceRelationshipExpanderTest extends Unit
     /**
      * @return void
      */
-    public function testAddResourceRelationshipsBrandsNull(): void
+    public function testAddResourceRelationshipsBrandsWithCountZero(): void
     {
         $this->restResourceInterfaceMock->expects($this->atLeastOnce())
             ->method('getPayload')
@@ -156,6 +156,10 @@ class BrandsCustomersResourceRelationshipExpanderTest extends Unit
         $this->customerTransferMock->expects($this->atLeastOnce())
             ->method('getBrandCollection')
             ->willReturn($this->brandCollectionTransferMock);
+
+        $this->brandCollectionTransferMock->expects($this->atLeastOnce())
+            ->method('getBrands')
+            ->willReturn(new ArrayObject());
 
         $this->brandsCustomersResourceRelationshipExpander->addResourceRelationships(
             $this->resources,
