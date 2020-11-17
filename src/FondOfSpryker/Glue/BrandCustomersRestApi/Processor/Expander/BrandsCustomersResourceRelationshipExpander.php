@@ -46,7 +46,7 @@ class BrandsCustomersResourceRelationshipExpander implements BrandsCustomersReso
 
             $brandTransfers = $brandCollectionTransfer->getBrands();
 
-            if ($brandTransfers === null || $brandTransfers->count() === 0) {
+            if ($brandTransfers->count() === 0) {
                 continue;
             }
 

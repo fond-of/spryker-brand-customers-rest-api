@@ -28,8 +28,6 @@ class BrandCustomersRestApiFactory extends AbstractFactory
     }
 
     /**
-     * @throws
-     *
      * @return \FondOfSpryker\Glue\BrandCustomersRestApi\Dependency\Client\BrandCustomersRestApiToBrandCustomerClientInterface
      */
     protected function getBrandCustomerClient(): BrandCustomersRestApiToBrandCustomerClientInterface
